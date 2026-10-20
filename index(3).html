@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alamin Tools - Powerful Online Tools</title>
+<style>
+:root{--bg:#050816;--fg:#f2f5ff;--muted:#9fb0d8;--blue:#2f8bff;--violet:#8b5cff}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5;overflow-x:hidden;
+background-image:radial-gradient(700px 500px at 80% 0,rgba(80,60,255,.28),transparent),radial-gradient(600px 500px at 0 40%,rgba(30,120,255,.14),transparent)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+header{display:flex;align-items:center;justify-content:space-between;padding:18px 0}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px}
+.logo i{width:34px;height:38px;background:linear-gradient(135deg,#3aa0ff,#8b5cff);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);display:grid;place-items:center;font:800 14px system-ui;color:#fff;font-style:normal}
+nav{display:flex;gap:28px;font-size:14px;color:var(--muted)}
+nav a:first-child{color:#fff;border-bottom:2px solid var(--violet);padding-bottom:4px}
+.btn{display:inline-block;padding:11px 22px;border-radius:999px;font-weight:600;font-size:14px;background:linear-gradient(90deg,#1fb6ff,#6a5cff);color:#fff;box-shadow:0 6px 24px rgba(70,120,255,.45)}
+.btn.ghost{background:transparent;border:1px solid rgba(130,160,255,.5);box-shadow:none}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:20px;padding:40px 0 30px}
+.eyebrow{letter-spacing:.25em;font-size:12px;color:#6fa8ff;margin-bottom:14px}
+h1{font-size:clamp(34px,6vw,56px);line-height:1.1}
+h1 span,h2 span{background:linear-gradient(90deg,#3aa0ff,#8b5cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:#c5d1f2;margin:18px 0 26px;max-width:440px}
+.hero .row{display:flex;gap:12px;flex-wrap:wrap}
+.stage{height:320px;display:grid;place-items:center;perspective:900px;position:relative}
+.stage:before{content:"";position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(110,80,255,.55),rgba(30,140,255,.25) 50%,transparent 70%);filter:blur(30px)}
+.cube{position:relative;width:150px;height:150px;transform-style:preserve-3d;animation:spin 14s linear infinite}
+.cube b{position:absolute;inset:0;display:grid;place-items:center;font:800 56px system-ui;color:#fff;border:2px solid rgba(160,190,255,.7);border-radius:18px;background:linear-gradient(135deg,rgba(47,139,255,.8),rgba(139,92,255,.8));box-shadow:inset 0 0 30px rgba(255,255,255,.25),0 0 30px rgba(90,120,255,.6)}
+.cube b:nth-child(1){transform:translateZ(75px)}
+.cube b:nth-child(2){transform:rotateY(180deg) translateZ(75px)}
+.cube b:nth-child(3){transform:rotateY(90deg) translateZ(75px)}
+.cube b:nth-child(4){transform:rotateY(-90deg) translateZ(75px)}
+.cube b:nth-child(5){transform:rotateX(90deg) translateZ(75px)}
+.cube b:nth-child(6){transform:rotateX(-90deg) translateZ(75px)}
+@keyframes spin{from{transform:rotateX(-22deg) rotateY(0)}to{transform:rotateX(-22deg) rotateY(360deg)}}
+@media (prefers-reduced-motion:reduce){.cube{animation:none;transform:rotateX(-22deg) rotateY(30deg)}}
+h2{text-align:center;font-size:clamp(26px,4vw,36px)}
+.sub{text-align:center;color:#8fb4ff;margin:6px 0 28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.card{--c:47,139,255;position:relative;padding:22px;border-radius:20px;border:1px solid rgba(var(--c),.55);background:linear-gradient(160deg,rgba(var(--c),.22),rgba(var(--c),.04) 60%,rgba(5,8,22,.6));box-shadow:0 0 24px rgba(var(--c),.18),inset 0 0 30px rgba(var(--c),.08);transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-6px);box-shadow:0 0 34px rgba(var(--c),.4)}
+.card .ic{font-size:54px;margin-bottom:8px;filter:drop-shadow(0 0 14px rgba(var(--c),.8))}
+.card h3{font-size:18px;margin-bottom:4px}
+.card p{font-size:14px;color:#b9c6e8;min-height:42px;margin-bottom:14px}
+.card .go{display:inline-block;padding:8px 18px;border-radius:999px;font-size:14px;font-weight:600;background:rgb(var(--c));color:#fff}
+.card.soon .go{background:rgba(255,255,255,.1);color:#9fb0d8}
+.card.soon{opacity:.85}
+.why{margin:56px 0 40px;padding:28px;border-radius:22px;border:1px solid rgba(110,140,255,.3);background:linear-gradient(135deg,rgba(20,40,110,.5),rgba(5,8,22,.6))}
+.why h2{text-align:left;margin-bottom:20px}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px}
+.feats .e{width:44px;height:44px;border-radius:50%;border:1px solid rgba(130,160,255,.6);display:grid;place-items:center;font-size:20px;margin-bottom:8px}
+.feats b{display:block}
+.feats small{color:var(--muted)}
+footer{border-top:1px solid rgba(130,160,255,.15);padding:26px 0 40px;text-align:center;color:var(--muted);font-size:13px}
+footer .logo{justify-content:center;margin-bottom:10px;color:#fff}
+@media (max-width:760px){nav{display:none}.hero{grid-template-columns:1fr}.stage{height:260px;order:-1}.cube{transform-origin:center}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="logo" href="#"><i>A</i> Alamin Tools</a>
+    <nav><a href="#">Home</a><a href="#tools">Tools</a><a href="#features">Features</a></nav>
+    <a class="btn" href="#tools">Get Started</a>
+  </header>
+
+  <section class="hero">
+    <div>
+      <div class="eyebrow">SMART TOOLS &nbsp;•&nbsp; BETTER RESULTS</div>
+      <h1>Powerful <span>Online Tools</span> All in One Place</h1>
+      <p>Handy tools that run right in your browser. No installation, no sign-up. Just open a tool and start using it.</p>
+      <div class="row"><a class="btn" href="#tools">Explore Tools →</a><a class="btn ghost" href="#features">Learn More</a></div>
+    </div>
+    <div class="stage"><div class="cube"><b>3D</b><b>3D</b><b>3D</b><b>3D</b><b>3D</b><b>3D</b></div></div>
+  </section>
+
+  <section id="tools">
+    <h2>Popular <span>Tools</span></h2>
+    <div class="sub">Everything you need, in one place.</div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="why" id="features">
+    <h2>Why Choose Our <span>Tools?</span></h2>
+    <div class="feats">
+      <div><div class="e">⚡</div><b>Fast &amp; Easy</b><small>Get results in seconds.</small></div>
+      <div><div class="e">🛡️</div><b>Secure</b><small>Everything runs on your device.</small></div>
+      <div><div class="e">☁️</div><b>No Installation</b><small>Works right in your browser.</small></div>
+      <div><div class="e">🖥️</div><b>Any Device</b><small>Phone, tablet or computer.</small></div>
+    </div>
+  </section>
+</div>
+<footer>
+  <div class="logo"><i>A</i> Alamin Tools</div>
+  © 2026 Alamin Tools. All rights reserved.
+</footer>
+<script src="tools.js"></script>
+<script>
+(function(){
+  var g=document.getElementById('grid'),T=window.TOOLS||[];
+  if(!T.length){g.textContent='Tools list could not be loaded.';return}
+  T.forEach(function(t){
+    var live=!!t.url,el=document.createElement(live?'a':'div');
+    el.className='card'+(live?'':' soon');el.style.setProperty('--c',t.color||'47,139,255');
+    if(live)el.href=t.url;
+    var ic=document.createElement('div');ic.className='ic';ic.textContent=t.icon||'🛠️';
+    var h=document.createElement('h3');h.textContent=t.name;
+    var p=document.createElement('p');p.textContent=t.desc||'';
+    var b=document.createElement('span');b.className='go';b.textContent=live?'Use Now →':'Coming soon';
+    el.append(ic,h,p,b);g.appendChild(el);
+  });
+})();
+</script>
+</body>
+</html>
