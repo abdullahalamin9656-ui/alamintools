@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D Timer</title>
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{background:#050816;color:#f2f5ff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+body{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 16px 40px;overflow-x:hidden;
+background-image:radial-gradient(600px 420px at 80% 0,rgba(90,70,255,.3),transparent),radial-gradient(500px 400px at 0 60%,rgba(30,150,255,.15),transparent)}
+.back{align-self:flex-start;color:#9fb0d8;font-size:14px;text-decoration:none}
+h1{font-size:22px;margin:8px 0}
+.scene{perspective:900px;width:min(300px,78vw);aspect-ratio:1;margin:26px 0}
+.watch{position:relative;width:100%;height:100%;transform-style:preserve-3d;transform:rotateX(18deg) rotateY(-14deg);transition:transform .15s ease-out}
+.layer{position:absolute;inset:0;border-radius:50%}
+.l0{transform:translateZ(-26px);background:#141a3a;box-shadow:0 40px 60px rgba(60,80,255,.35)}
+.l1{transform:translateZ(-12px);background:#1e2755}
+.ring{transform:translateZ(2px);background:conic-gradient(from 0deg,#ff3d71,#ffb020,#2fe38a,#25c5ff,#8b5cff,#ff3d71);--p:100%;-webkit-mask:conic-gradient(#000 var(--p),transparent 0);mask:conic-gradient(#000 var(--p),transparent 0);filter:drop-shadow(0 0 12px rgba(120,120,255,.7))}
+.face{inset:9%;transform:translateZ(10px);background:radial-gradient(circle at 35% 30%,#232d63,#0b1030);box-shadow:inset 0 6px 18px rgba(0,0,0,.6)}
+.digits{position:absolute;inset:0;display:grid;place-items:center;font:800 54px ui-monospace,Menlo,Consolas,monospace;transform:translateZ(40px);
+text-shadow:1px 1px 0 #6f7cff,2px 2px 0 #4c58d6,3px 3px 0 #2c3490,4px 8px 12px rgba(0,0,0,.6)}
+.digits.low{color:#ff6b7f;animation:pulse .5s infinite alternate}
+@keyframes pulse{to{transform:translateZ(60px) scale(1.06)}}
+.label{position:absolute;left:0;right:0;top:66%;text-align:center;font-size:13px;letter-spacing:.2em;color:#9fb0d8;text-transform:uppercase;transform:translateZ(30px)}
+.set{display:flex;align-items:center;gap:8px;font-size:28px;margin-bottom:12px}
+input{width:84px;padding:10px;text-align:center;font:700 24px inherit;font-family:ui-monospace,Menlo,monospace;color:#fff;background:#141a3a;border:1px solid #3a4590;border-radius:12px}
+input:disabled{opacity:.5}
+.set small{display:block;font-size:11px;color:#9fb0d8;text-align:center}
+.presets,.btns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:10px}
+button{font:600 15px inherit;font-family:inherit;border:0;border-radius:12px;padding:12px 20px;color:#fff;background:#222b63;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.4);transition:transform .08s,box-shadow .08s}
+button:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.presets button{padding:8px 16px;font-size:14px;background:#1a2150}
+#go{background:linear-gradient(90deg,#1fb6ff,#6a5cff);min-width:110px}
+#go.on{background:linear-gradient(90deg,#ff3d71,#ffb020)}
+canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9}
+</style>
+</head>
+<body>
+<a class="back" href="index.html">← All tools</a>
+<h1>3D Timer</h1>
+<div class="scene"><div class="watch" id="watch">
+  <div class="layer l0"></div><div class="layer l1"></div>
+  <div class="layer ring" id="ring"></div><div class="layer face"></div>
+  <div class="digits" id="digits">05:00</div><div class="label" id="label">Ready</div>
+</div></div>
+<div class="set">
+  <div><input id="min" type="number" min="0" max="99" value="5" inputmode="numeric"><small>min</small></div>:
+  <div><input id="sec" type="number" min="0" max="59" value="0" inputmode="numeric"><small>sec</small></div>
+</div>
+<div class="presets">
+  <button data-s="30">30s</button><button data-s="60">1 min</button><button data-s="300">5 min</button><button data-s="600">10 min</button><button data-s="1500">25 min</button>
+</div>
+<div class="btns"><button id="go">Start</button><button id="rst">Reset</button><button id="snd">Sound: On</button></div>
+<canvas id="fx"></canvas>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var digits=$('digits'),ring=$('ring'),label=$('label'),go=$('go'),rst=$('rst'),snd=$('snd'),min=$('min'),sec=$('sec'),watch=$('watch'),cv=$('fx'),cx=cv.getContext('2d');
+var AC=window.AudioContext||window.webkitAudioContext,ac=null,soundOn=true;
+function beep(f,d,v,t){if(!soundOn||!AC)return;try{ac=ac||new AC();if(ac.state==='suspended')ac.resume();var o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.25,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(ac.destination);o.start(n);o.stop(n+d)}catch(e){}}
+var total=300000,rem=300000,running=false,done=false,endAt=0,raf=0,lastSec=-1,timers=[];
+function pad(n){return n<10?'0'+n:''+n}
+function readInputs(){total=((+min.value||0)*60+(+sec.value||0))*1000;rem=total}
+function draw(){var s=Math.ceil(rem/1000);digits.textContent=pad(Math.floor(s/60))+':'+pad(s%60);
+  digits.classList.toggle('low',running&&s<=10&&s>0);ring.style.setProperty('--p',(total?rem/total*100:0)+'%')}
+function loop(){rem=Math.max(0,endAt-performance.now());var s=Math.ceil(rem/1000);
+  if(s!==lastSec){lastSec=s;if(s<=10&&s>0)beep(s<=3?1000:700,.08,.2)}
+  draw();if(rem<=0){finish();return}raf=requestAnimationFrame(loop)}
+function setIn(dis){min.disabled=sec.disabled=dis}
+function start(){if(done){reset();return}
+  if(!running&&rem<=0)readInputs();if(total<=0)return;
+  if(running){running=false;cancelAnimationFrame(raf);go.textContent='Resume';go.classList.remove('on');label.textContent='Paused';draw();return}
+  endAt=performance.now()+rem;running=true;lastSec=Math.ceil(rem/1000);setIn(true);go.textContent='Pause';go.classList.add('on');label.textContent='Running';beep(880,.15);loop()}
+function reset(){timers.forEach(clearTimeout);timers=[];cancelAnimationFrame(raf);running=false;done=false;setIn(false);readInputs();
+  go.textContent='Start';go.classList.remove('on');label.textContent='Ready';draw();beep(300,.15)}
+function finish(){running=false;done=true;setIn(false);draw();label.textContent='Time is up!';go.textContent='Again';go.classList.remove('on');
+  for(var i=0;i<10;i++)(function(i){timers.push(setTimeout(function(){beep(i%2?1175:880,.22,.3,'square')},i*330))})(i);
+  for(var j=0;j<12;j++)(function(j){timers.push(setTimeout(function(){burst(Math.random()*cv.width,Math.random()*cv.height*.6+40)},j*350))})(j);
+  if(navigator.vibrate)try{navigator.vibrate([300,150,300,150,500])}catch(e){}}
+var ps=[],fxOn=false,cols=['#ff3d71','#ffb020','#2fe38a','#25c5ff','#8b5cff','#fff'];
+function size(){cv.width=innerWidth;cv.height=innerHeight}size();window.addEventListener('resize',size);
+function burst(x,y){var c=cols[Math.floor(Math.random()*cols.length)];beep(120+Math.random()*80,.25,.18,'triangle');
+  for(var i=0;i<70;i++){var a=Math.random()*6.283,v=1.5+Math.random()*5;ps.push({x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:1,c:i%4?c:cols[(i)%6]})}
+  if(!fxOn){fxOn=true;anim()}}
+function anim(){cx.clearRect(0,0,cv.width,cv.height);
+  ps=ps.filter(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.06;p.vx*=.99;p.l-=.013;if(p.l<=0)return false;
+    cx.globalAlpha=p.l;cx.fillStyle=p.c;cx.beginPath();cx.arc(p.x,p.y,2.4,0,6.283);cx.fill();return true});
+  if(ps.length)requestAnimationFrame(anim);else{fxOn=false;cx.clearRect(0,0,cv.width,cv.height)}}
+go.onclick=start;rst.onclick=reset;
+snd.onclick=function(){soundOn=!soundOn;snd.textContent='Sound: '+(soundOn?'On':'Off');beep(700,.08)};
+function onIn(){if(!running){done=false;readInputs();draw();label.textContent='Ready';go.textContent='Start'}}
+min.oninput=sec.oninput=onIn;
+Array.prototype.forEach.call(document.querySelectorAll('[data-s]'),function(b){b.onclick=function(){if(running)return;var s=+b.getAttribute('data-s');min.value=Math.floor(s/60);sec.value=s%60;onIn()}});
+function tilt(x,y){var r=watch.parentNode.getBoundingClientRect(),dx=(x-(r.left+r.width/2))/innerWidth,dy=(y-(r.top+r.height/2))/innerHeight;
+  watch.style.transform='rotateX('+(-dy*50).toFixed(1)+'deg) rotateY('+(dx*60).toFixed(1)+'deg)'}
+addEventListener('mousemove',function(e){tilt(e.clientX,e.clientY)});
+addEventListener('touchmove',function(e){tilt(e.touches[0].clientX,e.touches[0].clientY)},{passive:true});
+readInputs();draw();
+})();
+</script>
+</body>
+</html>
